@@ -32,14 +32,12 @@ export default {
       playing:false,
     };
   },
-  mounted: function () {
-    this.player();
-  },
   methods: {
     play() {
+      this.player();
       this.node.connect(this.gainNode);
       this.gainNode.connect(this.ctx.destination);
-        this.playing=true;
+      this.playing=true;
     },
     stop() {
       this.node.disconnect();
@@ -49,6 +47,7 @@ export default {
       this.gainNode.gain.value = this.volume;
     },
     player() {
+      if(this.ctx) return false;
       this.ctx = new AudioContext();
 
       this.node = this.ctx.createScriptProcessor(
@@ -77,6 +76,8 @@ export default {
         z01 = z01 - 6;
         return average + z01 + deviation * z01;
       };
+
+      return true;
     },
   },
 };
