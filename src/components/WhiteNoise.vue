@@ -10,8 +10,8 @@
       v-on:change="changeVolume()"
     />
     <br />
-    <button id="play" v-on:click="play()">▶️</button>
-    <button id="stop" v-on:click="stop()">⏸️</button>
+    <button v-if="playing" id="stop" v-on:click="stop()">⏸️</button>
+    <button v-else id="play" v-on:click="play()">▶️</button>
   </p>
 </template>
 <script>
@@ -29,6 +29,7 @@ export default {
       volume: 0.01,
       average: 0.0,
       deviation: 1.0,
+      playing:false,
     };
   },
   mounted: function () {
@@ -38,9 +39,11 @@ export default {
     play() {
       this.node.connect(this.gainNode);
       this.gainNode.connect(this.ctx.destination);
+        this.playing=true;
     },
     stop() {
       this.node.disconnect();
+      this.playing=false;
     },
     changeVolume() {
       this.gainNode.gain.value = this.volume;
