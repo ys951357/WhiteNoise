@@ -5,8 +5,8 @@
       v-model.number="volume"
       type="range"
       min="0"
-      max="1"
-      step="0.01"
+      max="0.1"
+      step="0.001"
       v-on:change="changeVolume()"
     />
     <br />
