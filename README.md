@@ -2,4 +2,4 @@
 
 ホワイトノイズを出すだけ
 
-https://ys951357.github.io/whitenoise/
+https://ys951357.github.io/WhiteNoise/
