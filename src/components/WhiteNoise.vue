@@ -12,11 +12,17 @@
     <br />
     <button v-if="playing" id="stop" v-on:click="stop()">⏸️</button>
     <button v-else id="play" v-on:click="play()">▶️</button>
+    <br />
+    <input type="radio" id="white" value="white" v-model="picked" />
+    <label for="one">whitenoise</label>
+    |
+    <input type="radio" id="onef" value="onef" v-model="picked" />
+    <label for="two">1/f</label>
   </p>
 </template>
 <script>
 export default {
-  name: "WhiteNoise",
+  name: "Noise Generator",
   props: {},
   data() {
     return {
@@ -29,7 +35,8 @@ export default {
       volume: 0.01,
       average: 0.0,
       deviation: 1.0,
-      playing:false,
+      playing: false,
+      picked: "white",
     };
   },
   methods: {
@@ -37,17 +44,17 @@ export default {
       this.player();
       this.node.connect(this.gainNode);
       this.gainNode.connect(this.ctx.destination);
-      this.playing=true;
+      this.playing = true;
     },
     stop() {
       this.node.disconnect();
-      this.playing=false;
+      this.playing = false;
     },
     changeVolume() {
       this.gainNode.gain.value = this.volume;
     },
     player() {
-      if(this.ctx) return false;
+      if (this.ctx) return false;
       this.ctx = new AudioContext();
 
       this.node = this.ctx.createScriptProcessor(
@@ -59,15 +66,21 @@ export default {
       this.gainNode = this.ctx.createGain();
       this.gainNode.gain.value = this.volume;
 
-      this.node.onaudioprocess = function (e) {
+      this.node.onaudioprocess = (e) => {
         var data = e.outputBuffer.getChannelData(0);
 
         for (var i = 0; i < data.length; i++) {
-          data[i] = xRandomNormal(this.average, this.deviation);
+          if (this.picked == "white") {
+            data[i] = xRandomNormal(this.average, this.deviation);
+          } else if (this.picked == "onef") {
+            data[i] = xOneF(data[i - 1] || 0);
+          } else {
+            data[i] = 0;
+          }
         }
-      }.bind(this);
+      };
 
-      const xRandomNormal = function (average, deviation) {
+      const xRandomNormal = (average, deviation) => {
         // http://www.kogures.com/hitoshi/webtext/stat-random/index.html
         var z01 = 0;
         for (var i = 1; i <= 12; i++) {
@@ -75,6 +88,20 @@ export default {
         }
         z01 = z01 - 6;
         return average + z01 + deviation * z01;
+      };
+
+      const xOneF = (x) => {
+        let result;
+        if (x < 0.5) {
+          result = x + 2 * x * x;
+        } else {
+          result = x - 2 * (1 - x) * (1 - x);
+        }
+
+        if (result < 0.01 || result > 0.99) {
+          result = Math.random();
+        }
+        return result;
       };
 
       return true;
